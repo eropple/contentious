@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace Ed.Contentious
 {
@@ -31,19 +27,12 @@ namespace Ed.Contentious
         /// </remarks>
         public readonly String SubRoot;
         /// <summary>
-        /// All valid extensions for this content type. These extensions need
-        /// not be only file extensions; they are matched against the file name
-        /// (though not any attached directories) with String.EndsWith. As
-        /// such, an "extension" such as ".map.xml" would be accepted.
-        /// </summary>
-        public readonly ReadOnlyCollection<String> ValidExtensions;
-        /// <summary>
         /// The method that should be invoked to convert a loaded file stream
         /// into the requested type.
         /// </summary>
         /// <remarks>
         /// Due to one of the more braindead typing failures in .NET (the lack
-        /// of existential types, a la SomeClass<?> in Java), this delegate
+        /// of existential types, a la SomeClass[?] in Java), this delegate
         /// must always return Object. I know this sucks, and I apologize. A
         /// somewhat-okay patch is to define your parsing methods as returning
         /// the correct type anyway; methods matching delegate signatures takes
@@ -67,16 +56,13 @@ namespace Ed.Contentious
         /// of this type may be found. A null or empty string will make all
         /// paths relative to the ContentRoot and ignore this field.
         /// </param>
-        /// <param name="validExtensions">
-        /// A collection of valid extensions for this type.
-        /// </param>
         /// <param name="parseMethod">
         /// The parser method for this ContentInfo. Validity will be checked
         /// at runtime such that the return type of this method is assignable
         /// to the type of this ContentInfo.
         /// </param>
         public ContentInfo(Type type, String subRoot, 
-            IList<String> validExtensions, ContentLoadDelegate parseMethod)
+            ContentLoadDelegate parseMethod)
         {
             if (typeof(IDisposable).IsAssignableFrom(type) == false)
             {
@@ -90,15 +76,6 @@ namespace Ed.Contentious
                 subRoot = null;
             }
             SubRoot = subRoot;
-
-            if (validExtensions is ReadOnlyCollection<String>)
-            {
-                ValidExtensions = (ReadOnlyCollection<String>) validExtensions;
-            }
-            else
-            {
-                ValidExtensions = new ReadOnlyCollection<String>(validExtensions);
-            }
 
             if (type.IsAssignableFrom(parseMethod.Method.ReturnType) == false)
             {
@@ -123,7 +100,7 @@ namespace Ed.Contentious
         /// to the type of this ContentInfo.
         /// </param>
         public ContentInfo(Type type, ContentLoadDelegate parseMethod)
-            : this(type, null, new String[] { }, parseMethod)
+            : this(type, null, parseMethod)
         {
         }
     }

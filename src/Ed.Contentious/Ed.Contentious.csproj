@@ -43,6 +43,7 @@
     <Compile Include="ContentContext.cs" />
     <Compile Include="ContentInfo.cs" />
     <Compile Include="Exceptions\TypeNotRegisteredException.cs" />
+    <Compile Include="FileContentContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

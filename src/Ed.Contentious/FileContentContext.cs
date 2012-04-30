@@ -87,6 +87,12 @@ namespace Ed.Contentious
             TLoadType obj;
             if (table.TryGetValue(fullPath, out o) == false)
             {
+                if (File.Exists(fullPath) == false)
+                {
+                    throw new FileNotFoundException("Missing file for type: " + t,
+                        fullPath);
+                }
+
                 FileStream fs = File.OpenRead(fullPath);
                 obj = (TLoadType)info.ParseMethod(this, fs);
                 DisposalList.Add(obj);
