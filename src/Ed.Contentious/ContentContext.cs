@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Ed.Contentious
 {
@@ -12,15 +10,14 @@ namespace Ed.Contentious
     {
         protected readonly Dictionary<Type, ContentInfo> ContentTypeInfo;
 
-        public readonly String ContentRoot;
         public readonly ContentContext Parent;
 
-        protected ContentContext(String contentRoot, ContentContext parent)
+        protected ContentContext(ContentContext parent)
         {
             Parent = parent;
 
-
-            ContentRoot = (parent == null) ? contentRoot : Parent.ContentRoot;
+            // this is a readonly rather than a property for perf reasons; JIT
+            // on XNA/.NETCF is spotty at best
             ContentTypeInfo = (parent == null) ? new Dictionary<Type, ContentInfo>() 
                 : parent.ContentTypeInfo;
         }

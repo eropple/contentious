@@ -49,3 +49,11 @@ then request the same font file from a child context; it would be stupid to
 load the font file into the child context a second time. Of course, the child
 context won't try to Dispose() of resources it doesn't own, and disposing of a
 parent context disposes of all child contexts.
+
+## Variants ##
+**FileContentContext** is probably the one most people want: it's a layer of
+abstraction over the file system and nothing else. It should be noted that
+it's not super-secure; while it disallows ".." in keys, it shouldn't be
+considered a very effective way of disallowing access outside of the content
+root. (Future idea: use my Filotic library to sandbox this. Not for now,
+though.)
