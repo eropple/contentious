@@ -20,6 +20,8 @@ open source is a decent way to make sure that independent and reusable systems
 stay independent and reusable. If it's of use to you, awesome - use it in good
 health.
 
+-Ed Ropple (ed+contentious@edropple.com); @edropple on Twitter
+
 ## How It Works ##
 Contentious is based around the **ContentContext**. At its core, ContentContext
 objects define a location (by default on disk, but at some point adapters for
@@ -36,7 +38,8 @@ subroot for that type; providing a file extension is optional but recommended;
 automatic extension appending is provided mostly for future XNA friendliness
 but I don't use it in my own projects. All content types that are loaded into
 a ContentContext must implement IDisposable, because when a ContentContext is
-disposed it will dispose of all objects created through it.
+disposed it will dispose of all objects created through it. (Possible future
+change: allow any object, but auto-dispose any IDisposables when done.)
 
 ContentContexts also have the notion of parent contexts. In your application,
 you'll generally only explicitly create one global context via a constructor
@@ -57,3 +60,9 @@ it's not super-secure; while it disallows ".." in keys, it shouldn't be
 considered a very effective way of disallowing access outside of the content
 root. (Future idea: use my Filotic library to sandbox this. Not for now,
 though.)
+
+**XnaContentContext** is for use in XNA games; the same code could easily be
+used for MonoGame (though I don't know why you'd want to). The contentious-360
+project includes a version of this library for the Xbox 360; including it with
+this project did wacky things to my .sln file and for ease of deployment I've
+made it a single .sln anyway.
