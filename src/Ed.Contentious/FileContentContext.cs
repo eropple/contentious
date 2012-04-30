@@ -15,7 +15,7 @@ namespace Ed.Contentious
         public readonly String ContentRoot;
 
         protected readonly List<IDisposable> DisposalList = new List<IDisposable>(); 
-        protected readonly Dictionary<Type, Dictionary<String, IDisposable>> LookupTable =
+        protected readonly Dictionary<Type, Dictionary<String, IDisposable>> IdempotentLookupTable =
             new Dictionary<Type, Dictionary<String, IDisposable>>();
 
         public FileContentContext(String contentRoot)
@@ -35,23 +35,20 @@ namespace Ed.Contentious
             return new FileContentContext(this);
         }
 
-        protected override Boolean IsLoadedInContext<TLoadType>(String key)
+        protected override Boolean IsLoaded<TLoadType>(string key)
         {
             Type t = typeof(TLoadType);
-            ContentInfo info;
-            if (ContentTypeInfo.TryGetValue(t, out info) == false)
+            ContentInfo info = GetInfo(t);
+            if (info.Idempotent == false)
             {
-                throw new TypeNotRegisteredException("Type not registered: " + t);
+                throw new InvalidOperationException("IsLoaded<T> fails because " + 
+                    t + " is not idempotent.");
             }
 
-            String fullPath = Path.Combine(ContentRoot, info.SubRoot, key);
-            if (fullPath.Contains(".."))
-            {
-                throw new ArgumentException("Invalid path for Contentious: " + fullPath);
-            }
+            String fullPath = BuildFullPath(info, key);
 
             Dictionary<String, IDisposable> table;
-            if (LookupTable.TryGetValue(typeof(TLoadType), out table) == false)
+            if (IdempotentLookupTable.TryGetValue(t, out table) == false)
             {
                 return false;
             }
@@ -61,45 +58,44 @@ namespace Ed.Contentious
 
         protected override TLoadType LoadInContext<TLoadType>(string key)
         {
-            // "Copy-paste exactly once; if you need to again, refactor."
-
             Type t = typeof (TLoadType);
-            ContentInfo info;
-            if (ContentTypeInfo.TryGetValue(t, out info) == false)
-            {
-                throw new TypeNotRegisteredException("Type not registered: " + t);
-            }
+            ContentInfo info = GetInfo(t);
 
-            String fullPath = Path.Combine(ContentRoot, info.SubRoot, key);
+            String fullPath = BuildFullPath(info, key);
             if (fullPath.Contains(".."))
             {
                 throw new ArgumentException("Invalid path for Contentious: " + fullPath);
             }
 
-            Dictionary<String, IDisposable> table;
-            if (LookupTable.TryGetValue(t, out table) == false)
-            {
-                table = new Dictionary<String, IDisposable>();
-                LookupTable.Add(t, table);
-            }
-
-            IDisposable o;
             TLoadType obj;
-            if (table.TryGetValue(fullPath, out o) == false)
+            if (info.Idempotent)
             {
-                if (File.Exists(fullPath) == false)
+                Boolean checkLookupTable = true;
+                Dictionary<String, IDisposable> table;
+                if (IdempotentLookupTable.TryGetValue(t, out table) == false)
                 {
-                    throw new FileNotFoundException("Missing file for type: " + t,
-                        fullPath);
+                    table = new Dictionary<String, IDisposable>();
+                    IdempotentLookupTable.Add(t, table);
+                    checkLookupTable = false;
                 }
 
-                FileStream fs = File.OpenRead(fullPath);
-                obj = (TLoadType)info.ParseMethod(this, fs);
-                DisposalList.Add(obj);
+                IDisposable o;
+                if (checkLookupTable == false || table.TryGetValue(fullPath, out o) == false)
+                {
+                    FileStream fs = File.OpenRead(fullPath);
+                    obj = (TLoadType)info.ParseMethod(this, fs);
+                    table.Add(fullPath, obj);
+                    DisposalList.Add(obj);
+                }
+                else
+                {
+                    obj = (TLoadType)o;
+                }
             }
-            else
+            else // not idempotent objects
             {
-                obj = (TLoadType) o;
+                obj = (TLoadType)info.ParseMethod(this, File.OpenRead(fullPath));
+                DisposalList.Add(obj);
             }
 
             return obj;
@@ -107,7 +103,17 @@ namespace Ed.Contentious
 
         protected override void DisposeContext()
         {
-            throw new NotImplementedException();
+            foreach (IDisposable obj in DisposalList)
+            {
+                obj.Dispose();
+            }
+        }
+
+        protected String BuildFullPath(ContentInfo info, String key)
+        {
+            return (info.SubRoot != null)
+                ? Path.Combine(ContentRoot, info.SubRoot, key)
+                : Path.Combine(ContentRoot, key);
         }
     }
 }

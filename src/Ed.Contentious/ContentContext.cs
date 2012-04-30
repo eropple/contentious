@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Ed.Contentious.Exceptions;
 
 namespace Ed.Contentious
 {
@@ -58,38 +59,6 @@ namespace Ed.Contentious
 
         protected abstract ContentContext CreateChildContextReal();
 
-        /// <summary>
-        /// Determines whether this context, or a parent context, has already
-        /// loaded this type.
-        /// </summary>
-        /// <typeparam name="TLoadType"></typeparam>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public Boolean IsLoaded<TLoadType>(String key)
-            where TLoadType : IDisposable
-        {
-            if (IsRootContext == false)
-            {
-                if (Parent.IsLoaded<TLoadType>(key)) return true;
-            }
-
-            return IsLoadedInContext<TLoadType>(key);
-        }
-
-        /// <summary>
-        /// Internal method for determining whether or not this context (as
-        /// opposed to the chain of contexts in which this context exists)
-        /// has the desired object.
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// </remarks>
-        /// <typeparam name="TLoadType"></typeparam>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        protected abstract Boolean IsLoadedInContext<TLoadType>(String key)
-            where TLoadType : IDisposable;
-
 
         /// <summary>
         /// Loads the specified filename (within the context's ContentRoot) and
@@ -101,7 +70,9 @@ namespace Ed.Contentious
         public TLoadType Load<TLoadType>(String key)
             where TLoadType : IDisposable
         {
-            if (IsRootContext == false)
+            ContentInfo info = GetInfo<TLoadType>();
+
+            if (info.Idempotent && IsRootContext == false)
             {
                 if (Parent.IsLoaded<TLoadType>(key))
                 {
@@ -111,6 +82,15 @@ namespace Ed.Contentious
 
             return LoadInContext<TLoadType>(key);
         }
+
+        /// <summary>
+        /// Determines whether an idempotent object has been loaded for the
+        /// given key at a higher level.
+        /// </summary>
+        /// <typeparam name="TLoadType"></typeparam>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        protected abstract Boolean IsLoaded<TLoadType>(String key);
 
         /// <summary>
         /// Internal method for loading a content item into this context.
@@ -146,5 +126,23 @@ namespace Ed.Contentious
         /// wrapper to prevent multiple calls from doing anything.
         /// </summary>
         protected abstract void DisposeContext();
+
+
+        protected ContentInfo GetInfo<T>()
+        {
+            Type t = typeof (T);
+            return GetInfo(t);
+        }
+
+        protected ContentInfo GetInfo(Type t)
+        {
+            ContentInfo info;
+            if (ContentTypeInfo.TryGetValue(t, out info) == false)
+            {
+                throw new TypeNotRegisteredException("Type not registered: " + t);
+            }
+
+            return info;
+        }
     }
 }
