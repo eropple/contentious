@@ -1,0 +1,3 @@
+[submodule "contentious-360"]
+	path = contentious-360
+	url = git@github.com:eropple/contentious-360.git
