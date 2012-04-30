@@ -15,8 +15,8 @@ namespace Ed.Contentious
         public readonly String ContentRoot;
 
         protected readonly List<IDisposable> DisposalList = new List<IDisposable>(); 
-        protected readonly Dictionary<Type, Dictionary<String, Object>> LookupTable =
-            new Dictionary<Type, Dictionary<String, Object>>();
+        protected readonly Dictionary<Type, Dictionary<String, IDisposable>> LookupTable =
+            new Dictionary<Type, Dictionary<String, IDisposable>>();
 
         public FileContentContext(String contentRoot)
             : base(null)
@@ -30,7 +30,7 @@ namespace Ed.Contentious
             ContentRoot = parent.ContentRoot;
         }
 
-        public override ContentContext CreateChildContext()
+        protected override ContentContext CreateChildContextReal()
         {
             return new FileContentContext(this);
         }
@@ -50,13 +50,13 @@ namespace Ed.Contentious
                 throw new ArgumentException("Invalid path for Contentious: " + fullPath);
             }
 
-            Dictionary<String, Object> table;
+            Dictionary<String, IDisposable> table;
             if (LookupTable.TryGetValue(typeof(TLoadType), out table) == false)
             {
                 return false;
             }
 
-            return table.ContainsValue(fullPath);
+            return table.ContainsKey(fullPath);
         }
 
         protected override TLoadType LoadInContext<TLoadType>(string key)
@@ -76,14 +76,14 @@ namespace Ed.Contentious
                 throw new ArgumentException("Invalid path for Contentious: " + fullPath);
             }
 
-            Dictionary<String, Object> table;
+            Dictionary<String, IDisposable> table;
             if (LookupTable.TryGetValue(t, out table) == false)
             {
-                table = new Dictionary<String, Object>();
+                table = new Dictionary<String, IDisposable>();
                 LookupTable.Add(t, table);
             }
 
-            Object o;
+            IDisposable o;
             TLoadType obj;
             if (table.TryGetValue(fullPath, out o) == false)
             {

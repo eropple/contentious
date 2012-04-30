@@ -9,6 +9,7 @@ namespace Ed.Contentious
     public abstract class ContentContext : IDisposable
     {
         protected readonly Dictionary<Type, ContentInfo> ContentTypeInfo;
+        protected readonly List<ContentContext> ChildContexts = new List<ContentContext>(); 
 
         public readonly ContentContext Parent;
 
@@ -48,7 +49,14 @@ namespace Ed.Contentious
         /// its parent as its own.
         /// </summary>
         /// <returns>A new context that is the child of this one.</returns>
-        public abstract ContentContext CreateChildContext();
+        public ContentContext CreateChildContext()
+        {
+            ContentContext childContext = CreateChildContextReal();
+            ChildContexts.Add(childContext);
+            return childContext;
+        }
+
+        protected abstract ContentContext CreateChildContextReal();
 
         /// <summary>
         /// Determines whether this context, or a parent context, has already
@@ -115,10 +123,18 @@ namespace Ed.Contentious
 
 
         public Boolean IsDisposed { get; protected set; }
+        /// <summary>
+        /// Disposes of all content and child contexts.
+        /// </summary>
         public void Dispose()
         {
             if (IsDisposed) return;
             IsDisposed = true;
+
+            foreach (ContentContext child in ChildContexts)
+            {
+                child.Dispose();
+            }
 
             DisposeContext();
 
