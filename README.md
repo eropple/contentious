@@ -65,4 +65,5 @@ though.)
 used for MonoGame (though I don't know why you'd want to). The contentious-360
 project includes a version of this library for the Xbox 360; including it with
 this project did wacky things to my .sln file and for ease of deployment I've
-made it a single .sln anyway.
+made it a single .sln anyway. Honestly, I don't really recommend using this
+context on Windows at all, but it's included for completeness.
