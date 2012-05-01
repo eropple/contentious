@@ -45,6 +45,11 @@ namespace Ed.Contentious
             ContentTypeInfo.Add(info.Type, info);
         }
 
+        public void Register<TLoadType>(ContentLoadDelegate parseMethod, Boolean idempotent)
+        {
+            Register(new ContentInfo(typeof(TLoadType), parseMethod, idempotent));
+        }
+
         /// <summary>
         /// Creates a child context that will present already-loaded assets of
         /// its parent as its own.
