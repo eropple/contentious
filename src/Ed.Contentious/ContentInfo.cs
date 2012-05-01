@@ -48,16 +48,10 @@ namespace Ed.Contentious
         public readonly Boolean Idempotent;
 
         /// <summary>
-        /// The most specific constructor for a ContentInfo. Allows explicit
-        /// setting of all fields.
+        /// Constructor.
         /// </summary>
         /// <param name="type">
         /// The .NET type of this ContentInfo. Must implement IDisposable.
-        /// </param>
-        /// <param name="subRoot">
-        /// The sub-root, off of the context's ContentRoot, in which all files
-        /// of this type may be found. A null or empty string will make all
-        /// paths relative to the ContentRoot and ignore this field.
         /// </param>
         /// <param name="parseMethod">
         /// The parser method for this ContentInfo. Validity will be checked
@@ -68,7 +62,7 @@ namespace Ed.Contentious
         /// Whether or not a new object is created on every call of Load[T] for
         /// a given key.
         /// </param>
-        public ContentInfo(Type type, String subRoot, 
+        public ContentInfo(Type type,
             ContentLoadDelegate parseMethod, Boolean idempotent)
         {
             Idempotent = idempotent;
@@ -88,26 +82,6 @@ namespace Ed.Contentious
                     parseMethod.Method.ReturnType));
             }
             ParseMethod = parseMethod;
-        }
-
-        /// <summary>
-        /// A simplified constructor for ContentInfo.
-        /// </summary>
-        /// <param name="type">
-        /// The .NET type of this ContentInfo. Must implement IDisposable.
-        /// </param>
-        /// <param name="parseMethod">
-        /// The parser method for this ContentInfo. Validity will be checked
-        /// at runtime such that the return type of this method is assignable
-        /// to the type of this ContentInfo.
-        /// </param>
-        /// <param name="idempotent">
-        /// Whether or not a new object is created on every call of Load[T] for
-        /// a given key.
-        /// </param>
-        public ContentInfo(Type type, ContentLoadDelegate parseMethod, Boolean idempotent)
-            : this(type, null, parseMethod, idempotent)
-        {
         }
     }
 
