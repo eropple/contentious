@@ -15,18 +15,6 @@ namespace Ed.Contentious
         /// </summary>
         public readonly Type Type;
         /// <summary>
-        /// The path, attached to your given ContentContext.ContentRoot via
-        /// a simple System.IO.Path.Combine, under which all data files of this
-        /// type shall be stored.
-        /// </summary>
-        /// <remarks>
-        /// For example, if your ContentRoot is at "C:\Game\Content", and your
-        /// SubRoot is "Textures\Lossless", the SubRoot under which all 
-        /// instances of this type's files should be placed would be found at
-        /// "C:\Game\Content\Textures\Lossless".
-        /// </remarks>
-        public readonly String SubRoot;
-        /// <summary>
         /// The method that should be invoked to convert a loaded file stream
         /// into the requested type.
         /// </summary>
@@ -92,12 +80,6 @@ namespace Ed.Contentious
             }
             Type = type;
 
-            if (subRoot == String.Empty)
-            {
-                subRoot = null;
-            }
-            SubRoot = subRoot;
-
             if (type.IsAssignableFrom(parseMethod.Method.ReturnType) == false)
             {
                 throw new ArgumentException(String.Format("ParseMethod for type '{0}' " +
@@ -129,5 +111,5 @@ namespace Ed.Contentious
         }
     }
 
-    public delegate Object ContentLoadDelegate(ContentContext context, Stream input);
+    public delegate Object ContentLoadDelegate(ContentContext context, String contentKey, String contentPath);
 }

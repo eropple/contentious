@@ -80,7 +80,7 @@ namespace Ed.Contentious
                 if (checkLookupTable == false || table.TryGetValue(fullPath, out o) == false)
                 {
                     FileStream fs = File.OpenRead(fullPath);
-                    obj = (TLoadType)info.ParseMethod(this, fs);
+                    obj = (TLoadType)info.ParseMethod(this, key, fullPath);
                     table.Add(fullPath, obj);
                     DisposalList.Add(obj);
                 }
@@ -91,7 +91,7 @@ namespace Ed.Contentious
             }
             else // not idempotent objects
             {
-                obj = (TLoadType)info.ParseMethod(this, File.OpenRead(fullPath));
+                obj = (TLoadType)info.ParseMethod(this, key, fullPath);
                 DisposalList.Add(obj);
             }
 
@@ -108,9 +108,7 @@ namespace Ed.Contentious
 
         protected String BuildFullPath(ContentInfo info, String key)
         {
-            return (info.SubRoot != null)
-                ? Path.Combine(ContentRoot, info.SubRoot, key)
-                : Path.Combine(ContentRoot, key);
+            return Path.Combine(ContentRoot, key);
         }
     }
 }

@@ -27,14 +27,12 @@ Contentious is based around the **ContentContext**. At its core, ContentContext
 objects define a location (by default on disk, but at some point adapters for
 Android's weird file storage and a layer that can sit on top of XNA's
 ContentManager stuff) and a set of content types. Each content type contains a
-Type (what a given file resource will be turned into), an optional sub-path
-within your content root where all files pertaining to this type will live (for
-example, you might have all Texture2D objects as .png and stored within
-$CONTENTROOT/Textures), and an Idempotent flag. Types that are flagged as
-Idempotent will create only a single instance of it for a given context and any
-child contexts; my go-to example is that a sprite font object would probably be
-immutable and not something you'd want to load multiple times--but you'd still
-want it to be lifetime-controlled by the top-level context.
+Type (what a given file resource will be turned into), and an Idempotent flag. 
+Types that are flagged as Idempotent will create only a single instance of it
+for a given context and any child contexts; my go-to example is that a sprite
+font object would probably be immutable and not something you'd want to load
+multiple times--but you'd still want it to be lifetime-controlled by the
+top-level context.
 
 Once you've created a ContentContext, you load in a resource via the
 ContentContext.Load<T>() method. Your path should be relative to the content

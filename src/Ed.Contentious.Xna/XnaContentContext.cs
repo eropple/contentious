@@ -126,14 +126,10 @@ namespace Ed.Contentious.Xna
 
         protected String BuildPath(ContentInfo info, String key)
         {
-            String p = (info.SubRoot != null)
-                ? Path.Combine(info.SubRoot, key)
-                : key;
-
             // because XNA's developers made the A+ decision to chop off
             // file extensions when adding content. That doesn't screw with
             // everyone else ever, right guys?
-            return Path.Combine(Path.GetDirectoryName(p), Path.GetFileName(p));
+            return Path.Combine(Path.GetDirectoryName(key), Path.GetFileName(key));
         }
     }
 }
